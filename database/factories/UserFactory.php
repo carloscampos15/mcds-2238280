@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class UserFactory extends Factory
 {
@@ -22,12 +23,22 @@ class UserFactory extends Factory
      */
     public function definition()
     {
-        return [
-            'name' => $this->faker->name,
+        $gender = $this->faker->randomElement(['male', 'female']);
+        $user = [
+            'name' => $this->faker->name($gender),
             'email' => $this->faker->unique()->safeEmail,
-            'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-            'remember_token' => Str::random(10),
+            'gender' => $gender,
+            'cellphone' => $this->faker->numberBetween($min = 3101000000, $max = 3202000000),
+            'birthdate' => $this->faker->dateTimeBetween($startDate = '-39 years', $endDate = '1999-12-31', $timezone = null),
+            'password' => Hash::make("secret"),
         ];
+
+        $user['photo_url'] = function($user){
+            $image = file_get_contents($this->faker->imageUrl(800,600,'people'));
+            $photo_url = "public/imgs/".$user['name'].".png";
+            file_put_contents($photo_url, $image);
+            return $photo_url;
+        };
+        return $user;
     }
 }
